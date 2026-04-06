@@ -1,0 +1,35 @@
+/* iPhone-safe global reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #1e1b4b;
+  --color-surface: #2d2a6e;
+  --color-primary: #8b5cf6;
+  --color-text: #f5f3ff;
+  --color-muted: #a5b4fc;
+
+  /* Respect iPhone safe area insets (notch / home indicator) */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* Prevent font scaling on orientation change in iOS */
+  -webkit-text-size-adjust: 100%;
+  /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
