@@ -1,20 +1,58 @@
-import './App.css'
+import { useState, useCallback } from 'react';
+import './App.css';
+import { getData } from './data';
+import TabBar from './components/TabBar';
+import Projekte from './components/Projekte';
+import ProjectDetail from './components/ProjectDetail';
+import Sammlung from './components/Sammlung';
+import Profil from './components/Profil';
 
-function App() {
+export default function App() {
+  const [tab, setTab] = useState('projekte');
+  const [activeProjectId, setActiveProjectId] = useState(null);
+  const [data, setData] = useState(() => getData());
+
+  const handleOpenProject = useCallback((id) => {
+    setActiveProjectId(id);
+  }, []);
+
+  const handleBack = useCallback(() => {
+    setActiveProjectId(null);
+  }, []);
+
+  const handleDataChange = useCallback((next) => {
+    setData(next);
+  }, []);
+
+  const handleTabChange = (newTab) => {
+    setTab(newTab);
+    setActiveProjectId(null);
+  };
+
+  const activeProject = activeProjectId
+    ? data.projects.find((p) => p.id === activeProjectId)
+    : null;
+
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>💃 Dance Tracker</h1>
-        <p className="subtitle">Verfolge deine Tanzeinheiten</p>
-      </header>
-
+      {/* Main scrollable content */}
       <main className="app-main">
-        <div className="card">
-          <p>Willkommen! Die App kommt bald.</p>
-        </div>
+        {tab === 'projekte' && !activeProject && (
+          <Projekte data={data} onOpenProject={handleOpenProject} />
+        )}
+        {tab === 'projekte' && activeProject && (
+          <ProjectDetail
+            project={activeProject}
+            onBack={handleBack}
+            onDataChange={handleDataChange}
+          />
+        )}
+        {tab === 'sammlung' && <Sammlung data={data} />}
+        {tab === 'profil' && <Profil data={data} />}
       </main>
-    </div>
-  )
-}
 
-export default App
+      {/* Bottom Tab Bar */}
+      <TabBar activeTab={tab} onTabChange={handleTabChange} />
+    </div>
+  );
+}

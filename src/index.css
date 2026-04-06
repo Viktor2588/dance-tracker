@@ -6,30 +6,71 @@
 }
 
 :root {
-  --color-bg: #fff0e6;
-  --color-surface: #ffd9b8;
-  --color-primary: #d4622a;
-  --color-text: #3d1f0a;
-  --color-muted: #b05b30;
+  /* Design Tokens – DanceLog */
+  --color-bg: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #F5F0EB;
+  --color-accent: #E8D5C4;
+  --color-accent-dark: #C8A990;
+  --color-rose: #E8C5B8;
+  --color-gold: #C9A84C;
+  --color-gold-bg: #FFF8E6;
 
-  /* Respect iPhone safe area insets (notch / home indicator) */
+  --color-text: #2D2D2D;
+  --color-text-muted: #8A8A8A;
+  --color-text-light: #B0A090;
+
+  /* Status badges */
+  --badge-none-bg: #EFEFEF;
+  --badge-none-text: #888888;
+  --badge-progress-bg: #F5E6D3;
+  --badge-progress-text: #A06030;
+  --badge-safe-bg: #FFF3D6;
+  --badge-safe-text: #9A7020;
+
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+
+  --shadow-card: 0 2px 16px rgba(0,0,0,0.06);
+  --shadow-card-hover: 0 6px 24px rgba(0,0,0,0.10);
+
+  /* iPhone safe area */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --tab-height: 68px;
 }
 
 html, body {
   height: 100%;
   background-color: var(--color-bg);
   color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  /* Prevent font scaling on orientation change in iOS */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-text-size-adjust: 100%;
-  /* Smooth scrolling on iOS */
   -webkit-overflow-scrolling: touch;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 #root {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+input, textarea {
+  font-family: inherit;
 }
