@@ -77,7 +77,7 @@ export default function Profil({ data }) {
         <p style={{ fontSize: '0.9rem', color: 'var(--color-text)', lineHeight: 1.7 }}>
           DanceLog ist dein persönliches Tanz-Journal für Bachata. Behalte den Überblick über deine Projekte, verfolge deinen Fortschritt und trainiere mit deinen Lieblingsvideos.
         </p>
-        <p style={{ marginTop: 16, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Version 1.0 · Bachata Training App</p>
+        <p style={{ marginTop: 16, fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>Version 1.1 · Bachata Training App</p>
       </div>
     </div>
   );
