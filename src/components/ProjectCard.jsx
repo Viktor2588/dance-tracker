@@ -1,7 +1,21 @@
 import { getYoutubeThumbnail } from '../data';
 
+function getProgress(project) {
+  const videos = project.practiceVideos;
+  if (!videos.length) return 0;
+  const total = videos.reduce((acc, v) => acc + v.trainedDates.length, 0);
+  // Cap at 10 sessions per video as "fully practiced"
+  const maxExpected = videos.length * 10;
+  return Math.min(100, Math.round((total / maxExpected) * 100));
+}
+
 export default function ProjectCard({ project, onClick }) {
   const thumbnail = getYoutubeThumbnail(project.demoVideoId);
+  const progress = getProgress(project);
+  const totalSessions = project.practiceVideos.reduce(
+    (acc, v) => acc + v.trainedDates.length,
+    0
+  );
 
   return (
     <div
@@ -20,8 +34,23 @@ export default function ProjectCard({ project, onClick }) {
       onTouchStart={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
       onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
     >
+      {/* Progress bar (top) */}
+      <div style={{ height: 4, background: 'var(--color-surface-raised)', position: 'relative' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 0, left: 0,
+            height: '100%',
+            width: `${progress}%`,
+            background: 'linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
+            borderRadius: '0 2px 2px 0',
+            transition: 'width 0.6s ease',
+          }}
+        />
+      </div>
+
       {/* Thumbnail */}
-      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#EDE0D4', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#E8F5E9', overflow: 'hidden' }}>
         <img
           src={thumbnail}
           alt={project.title}
@@ -56,7 +85,7 @@ export default function ProjectCard({ project, onClick }) {
               boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
             }}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--color-text)" style={{ marginLeft: 3 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--color-primary)" style={{ marginLeft: 3 }}>
               <polygon points="5,3 19,12 5,21" />
             </svg>
           </div>
@@ -68,7 +97,7 @@ export default function ProjectCard({ project, onClick }) {
             position: 'absolute',
             top: 12,
             right: 12,
-            background: 'rgba(255,255,255,0.9)',
+            background: 'rgba(255,255,255,0.92)',
             borderRadius: 20,
             padding: '3px 10px',
             fontSize: '0.7rem',
@@ -85,9 +114,30 @@ export default function ProjectCard({ project, onClick }) {
         <p style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--color-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
           {project.category}
         </p>
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text)', lineHeight: 1.3 }}>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text)', lineHeight: 1.3, marginBottom: 10 }}>
           {project.title}
         </h2>
+
+        {/* Progress row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 120, height: 6, background: 'var(--color-surface-raised)', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                width: `${progress}%`,
+                background: 'linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
+                borderRadius: 3,
+                transition: 'width 0.6s',
+              }} />
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{progress}%</span>
+          </div>
+          {totalSessions > 0 && (
+            <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+              {totalSessions}× trainiert
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
