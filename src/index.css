@@ -6,11 +6,11 @@
 }
 
 :root {
-  --color-bg: #1e1b4b;
-  --color-surface: #2d2a6e;
-  --color-primary: #8b5cf6;
-  --color-text: #f5f3ff;
-  --color-muted: #a5b4fc;
+  --color-bg: #fff0e6;
+  --color-surface: #ffd9b8;
+  --color-primary: #d4622a;
+  --color-text: #3d1f0a;
+  --color-muted: #b05b30;
 
   /* Respect iPhone safe area insets (notch / home indicator) */
   --safe-top: env(safe-area-inset-top, 0px);
