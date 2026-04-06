@@ -6,27 +6,39 @@
 }
 
 :root {
-  /* Design Tokens – DanceLog */
-  --color-bg: #FAF8F5;
+  /* Design Tokens – DanceLog v1.1 (Green + Blue) */
+  --color-bg: #F8FAFC;
   --color-surface: #FFFFFF;
-  --color-surface-raised: #F5F0EB;
-  --color-accent: #E8D5C4;
-  --color-accent-dark: #C8A990;
-  --color-rose: #E8C5B8;
-  --color-gold: #C9A84C;
-  --color-gold-bg: #FFF8E6;
+  --color-surface-raised: #F1F5F9;
 
-  --color-text: #2D2D2D;
-  --color-text-muted: #8A8A8A;
-  --color-text-light: #B0A090;
+  /* Primary: Green */
+  --color-primary: #16A34A;
+  --color-primary-light: #DCFCE7;
+  --color-primary-dark: #15803D;
+
+  /* Secondary: Blue */
+  --color-secondary: #2563EB;
+  --color-secondary-light: #DBEAFE;
+  --color-secondary-dark: #1D4ED8;
+
+  /* Aliases kept for backward-compat with existing components */
+  --color-accent: #DCFCE7;          /* primary-light */
+  --color-accent-dark: #16A34A;     /* primary */
+  --color-rose: #DBEAFE;            /* secondary-light */
+  --color-gold: #16A34A;            /* primary */
+  --color-gold-bg: #DCFCE7;         /* primary-light */
+
+  --color-text: #1E293B;
+  --color-text-muted: #64748B;
+  --color-text-light: #94A3B8;
 
   /* Status badges */
-  --badge-none-bg: #EFEFEF;
-  --badge-none-text: #888888;
-  --badge-progress-bg: #F5E6D3;
-  --badge-progress-text: #A06030;
-  --badge-safe-bg: #FFF3D6;
-  --badge-safe-text: #9A7020;
+  --badge-none-bg: #F1F5F9;
+  --badge-none-text: #64748B;
+  --badge-progress-bg: #DBEAFE;
+  --badge-progress-text: #1D4ED8;
+  --badge-safe-bg: #DCFCE7;
+  --badge-safe-text: #15803D;
 
   --border-radius-sm: 8px;
   --border-radius-md: 16px;

@@ -221,7 +221,7 @@ function PracticeVideoCard({ video, isPlaying, onPlay, isTodayTrained, onTrained
                   fontSize: '0.85rem',
                   fontWeight: video.status === key ? 600 : 400,
                   color: 'var(--color-text)',
-                  background: video.status === key ? 'var(--color-accent)' : 'transparent',
+                  background: video.status === key ? 'var(--color-primary-light)' : 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                 }}
@@ -249,9 +249,11 @@ function PracticeVideoCard({ video, isPlaying, onPlay, isTodayTrained, onTrained
             fontSize: '0.9rem',
             fontWeight: 600,
             letterSpacing: '0.02em',
-            border: isTodayTrained ? 'none' : '1.5px solid var(--color-accent-dark)',
-            background: isTodayTrained ? 'var(--color-accent)' : 'transparent',
-            color: isTodayTrained ? 'var(--color-text)' : 'var(--color-text)',
+            border: isTodayTrained ? 'none' : '1.5px solid var(--color-primary)',
+            background: isTodayTrained
+              ? 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)'
+              : 'transparent',
+            color: isTodayTrained ? '#fff' : 'var(--color-primary)',
             cursor: isTodayTrained ? 'default' : 'pointer',
             transition: 'all 0.25s',
             display: 'flex',

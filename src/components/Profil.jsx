@@ -1,8 +1,9 @@
-import { getAllVideos, STATUS_LABELS } from '../data';
+import { getAllVideos, STATUS_LABELS, getStreak } from '../data';
 
 export default function Profil({ data }) {
   const allVideos = getAllVideos(data);
   const totalTrainings = allVideos.reduce((acc, v) => acc + v.trainedDates.length, 0);
+  const streak = getStreak(data);
 
   const statusCounts = allVideos.reduce(
     (acc, v) => ({ ...acc, [v.status]: (acc[v.status] || 0) + 1 }),
@@ -24,7 +25,7 @@ export default function Profil({ data }) {
       {/* Avatar Card */}
       <div
         style={{
-          background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-rose) 100%)',
+          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
           borderRadius: 'var(--border-radius-lg)',
           padding: '28px 24px',
           marginBottom: 20,
@@ -35,7 +36,7 @@ export default function Profil({ data }) {
       >
         <div style={{
           width: 64, height: 64, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.6)',
+          background: 'rgba(255,255,255,0.25)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '2rem',
           flexShrink: 0,
@@ -43,10 +44,33 @@ export default function Profil({ data }) {
           💃
         </div>
         <div>
-          <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text)' }}>Bachata Tänzer</p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 2 }}>Bachata · Sensual · Moderna</p>
+          <p style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>Bachata Tänzer</p>
+          <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>Bachata · Sensual · Moderna</p>
         </div>
       </div>
+
+      {/* Streak Banner */}
+      {streak > 0 && (
+        <div style={{
+          background: 'var(--color-primary-light)',
+          borderRadius: 'var(--border-radius-md)',
+          padding: '16px 20px',
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+        }}>
+          <span style={{ fontSize: '1.8rem' }}>🔥</span>
+          <div>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-primary-dark)' }}>
+              {streak} {streak === 1 ? 'Tag' : 'Tage'} in Folge trainiert
+            </p>
+            <p style={{ fontSize: '0.78rem', color: 'var(--color-primary)', marginTop: 2, fontWeight: 500 }}>
+              Weiter so! 💪
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
@@ -92,16 +116,16 @@ function StatCard({ value, label }) {
       textAlign: 'center',
       boxShadow: 'var(--shadow-card)',
     }}>
-      <p style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-text)', lineHeight: 1 }}>{value}</p>
+      <p style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-primary)', lineHeight: 1 }}>{value}</p>
       <p style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', marginTop: 6, fontWeight: 500 }}>{label}</p>
     </div>
   );
 }
 
 const statusBarFillColors = {
-  'nicht-begonnen': '#CCCCCC',
-  'in-uebung': '#C8813C',
-  'sicher': 'var(--color-gold)',
+  'nicht-begonnen': 'var(--color-surface-raised)',
+  'in-uebung': 'var(--color-secondary)',
+  'sicher': 'var(--color-primary)',
 };
 
 function ProgressRow({ label, count, pct, statusKey }) {

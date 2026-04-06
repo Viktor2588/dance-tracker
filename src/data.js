@@ -11,15 +11,32 @@ export const STATUS = {
 export const STATUS_LABELS = {
   [STATUS.NICHT_BEGONNEN]: 'Nicht begonnen',
   [STATUS.IN_UEBUNG]: 'In Übung',
-  [STATUS.SICHER]: 'Sicher',
+  [STATUS.SICHER]: 'Sicher in Ausführung',
 };
+
+export const CATEGORIES = [
+  'Tanzunterricht',
+  'Workshop',
+  'Festival',
+  'Übung Solo',
+  'Übung mit Partner',
+  'Improvisation',
+];
+
+export const STYLE_TAGS = [
+  'Flow',
+  'Fundamentals',
+  'Footwork',
+  'Dominican Bachata',
+  'Sensual',
+];
 
 const initialData = {
   projects: [
     {
       id: 'p1',
       title: 'Bachata Sensual Flow',
-      category: 'Bachata Sensual',
+      category: 'Tanzunterricht',
       demoVideoId: 'JnODTEK-pgI',
       demoNotes:
         'Fokus auf weiche Körperwellen und flüssige Verbindung. Schultern locker, Hüfte folgt der Musik. Schrittfolge: 1-2-3-tap, 5-6-7-tap. Besonders auf den Körperkontakt und die gemeinsame Bewegungsrichtung achten.',
@@ -32,6 +49,10 @@ const initialData = {
           date: '2025-03-28',
           status: STATUS.SICHER,
           trainedDates: ['2025-03-28', '2025-04-01', '2025-04-05'],
+          last_practiced_at: '2025-04-05',
+          tags: ['Körperwelle', 'Grundschritt'],
+          style_tags: ['Flow', 'Sensual'],
+          category: 'Tanzunterricht',
         },
         {
           id: 'v2',
@@ -41,6 +62,10 @@ const initialData = {
           date: '2025-04-01',
           status: STATUS.IN_UEBUNG,
           trainedDates: ['2025-04-01', '2025-04-03'],
+          last_practiced_at: '2025-04-03',
+          tags: ['Drehung'],
+          style_tags: ['Sensual'],
+          category: 'Tanzunterricht',
         },
         {
           id: 'v3',
@@ -50,13 +75,17 @@ const initialData = {
           date: '2025-04-04',
           status: STATUS.NICHT_BEGONNEN,
           trainedDates: [],
+          last_practiced_at: null,
+          tags: ['Dip', 'Rückwärtsbewegung'],
+          style_tags: ['Flow', 'Sensual'],
+          category: 'Tanzunterricht',
         },
       ],
     },
     {
       id: 'p2',
       title: 'Bachata Moderna Footwork',
-      category: 'Bachata Moderna',
+      category: 'Workshop',
       demoVideoId: 'KQ3gIL2B3wo',
       demoNotes:
         'Schnelle Fußarbeit kombiniert mit klassischen Drehfiguren. Gewichtsverlagerung ist entscheidend. Timing: eng am Beat bleiben, kein Verzögern bei den Synkopen.',
@@ -69,6 +98,10 @@ const initialData = {
           date: '2025-03-20',
           status: STATUS.IN_UEBUNG,
           trainedDates: ['2025-03-20', '2025-03-25'],
+          last_practiced_at: '2025-03-25',
+          tags: ['Synkopen', 'Timing'],
+          style_tags: ['Footwork', 'Fundamentals'],
+          category: 'Workshop',
         },
         {
           id: 'v5',
@@ -78,13 +111,17 @@ const initialData = {
           date: '2025-04-02',
           status: STATUS.NICHT_BEGONNEN,
           trainedDates: [],
+          last_practiced_at: null,
+          tags: ['Cross-Body'],
+          style_tags: ['Fundamentals'],
+          category: 'Workshop',
         },
       ],
     },
     {
       id: 'p3',
       title: 'Romantik-Figuren',
-      category: 'Bachata Sensual',
+      category: 'Tanzunterricht',
       demoVideoId: 'YlUKcNnnaf8',
       demoNotes:
         'Langsame, ausdrucksstarke Figuren für romantische Musikpassagen. Augen-Kontakt halten, Bewegungen nicht übertreiben. Qualität vor Quantität.',
@@ -97,6 +134,10 @@ const initialData = {
           date: '2025-04-05',
           status: STATUS.NICHT_BEGONNEN,
           trainedDates: [],
+          last_practiced_at: null,
+          tags: ['Embrace'],
+          style_tags: ['Sensual', 'Flow'],
+          category: 'Tanzunterricht',
         },
       ],
     },
@@ -140,7 +181,7 @@ export function addTrainingToday(videoId) {
       ...p,
       practiceVideos: p.practiceVideos.map((v) =>
         v.id === videoId && !v.trainedDates.includes(today)
-          ? { ...v, trainedDates: [...v.trainedDates, today] }
+          ? { ...v, trainedDates: [...v.trainedDates, today], last_practiced_at: today }
           : v
       ),
     })),
@@ -159,12 +200,111 @@ export function updateVideoStatus(videoId, status) {
   }));
 }
 
+export function addPracticeVideo(projectId, { title, videoId, notes = '' }) {
+  const today = new Date().toISOString().split('T')[0];
+  const newVideo = {
+    id: `v${Date.now()}`,
+    projectId,
+    title,
+    videoId,
+    date: today,
+    status: STATUS.NICHT_BEGONNEN,
+    trainedDates: [],
+    last_practiced_at: null,
+    tags: [],
+    style_tags: [],
+    category: '',
+    notes,
+  };
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) =>
+      p.id === projectId
+        ? { ...p, practiceVideos: [newVideo, ...p.practiceVideos] }
+        : p
+    ),
+  }));
+}
+
+export function addProject({ title, category, demoVideoId, demoNotes = '' }) {
+  const newProject = {
+    id: `p${Date.now()}`,
+    title,
+    category,
+    demoVideoId,
+    demoNotes,
+    practiceVideos: [],
+  };
+  return updateData((data) => ({
+    ...data,
+    projects: [...data.projects, newProject],
+  }));
+}
+
 export function getAllVideos(data) {
   return data.projects
     .flatMap((p) =>
       p.practiceVideos.map((v) => ({ ...v, projectTitle: p.title }))
     )
     .sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+export function getStreak(data) {
+  const allDates = new Set(
+    data.projects.flatMap((p) => p.practiceVideos.flatMap((v) => v.trainedDates))
+  );
+  const today = new Date().toISOString().split('T')[0];
+  const startOffset = allDates.has(today) ? 0 : 1;
+  let streak = 0;
+  const base = new Date();
+  for (let i = startOffset; i < 365; i++) {
+    const d = new Date(base);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    if (allDates.has(dateStr)) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+export function getWeeklyActivity(data) {
+  const allDates = data.projects.flatMap((p) =>
+    p.practiceVideos.flatMap((v) => v.trainedDates)
+  );
+  const result = [];
+  const base = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(base);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    result.push({
+      date: dateStr,
+      count: allDates.filter((date) => date === dateStr).length,
+      label: d.toLocaleDateString('de-DE', { weekday: 'short' }),
+    });
+  }
+  return result;
+}
+
+export function getMonthlyActivity(data) {
+  const allDates = data.projects.flatMap((p) =>
+    p.practiceVideos.flatMap((v) => v.trainedDates)
+  );
+  const result = [];
+  const base = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(base);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    result.push({
+      date: dateStr,
+      count: allDates.filter((date) => date === dateStr).length,
+    });
+  }
+  return result;
 }
 
 export function getYoutubeThumbnail(videoId) {
