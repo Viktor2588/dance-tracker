@@ -13,7 +13,7 @@ export default defineConfig({
         name: 'Dance Tracker',
         short_name: 'DanceTracker',
         description: 'Track your dance sessions',
-        theme_color: '#8b5cf6',
+        theme_color: '#FFDAB9',
         background_color: '#1e1b4b',
         display: 'standalone',
         orientation: 'portrait',
