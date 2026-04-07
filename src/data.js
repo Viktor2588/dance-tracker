@@ -14,6 +14,18 @@ export const STATUS_LABELS = {
   [STATUS.SICHER]: 'Sicher in Ausführung',
 };
 
+export const TRAINING_STATUS = {
+  NICHT_BEGONNEN: 'nicht-begonnen',
+  IN_BEARBEITUNG: 'in-bearbeitung',
+  ABGESCHLOSSEN: 'abgeschlossen',
+};
+
+export const TRAINING_STATUS_LABELS = {
+  [TRAINING_STATUS.NICHT_BEGONNEN]: 'Nicht begonnen',
+  [TRAINING_STATUS.IN_BEARBEITUNG]: 'In Bearbeitung',
+  [TRAINING_STATUS.ABGESCHLOSSEN]: 'Abgeschlossen',
+};
+
 export const CATEGORIES = [
   'Tanzunterricht',
   'Workshop',
@@ -32,6 +44,7 @@ export const STYLE_TAGS = [
 ];
 
 const initialData = {
+  trainingExercises: [],
   projects: [
     {
       id: 'p1',
@@ -40,6 +53,7 @@ const initialData = {
       demoVideoId: 'JnODTEK-pgI',
       demoNotes:
         'Fokus auf weiche Körperwellen und flüssige Verbindung. Schultern locker, Hüfte folgt der Musik. Schrittfolge: 1-2-3-tap, 5-6-7-tap. Besonders auf den Körperkontakt und die gemeinsame Bewegungsrichtung achten.',
+      demoHashtags: ['#Körperwelle', '#Sensual', '#Flow'],
       practiceVideos: [
         {
           id: 'v1',
@@ -53,6 +67,7 @@ const initialData = {
           tags: ['Körperwelle', 'Grundschritt'],
           style_tags: ['Flow', 'Sensual'],
           category: 'Tanzunterricht',
+          notes: '',
         },
         {
           id: 'v2',
@@ -66,6 +81,7 @@ const initialData = {
           tags: ['Drehung'],
           style_tags: ['Sensual'],
           category: 'Tanzunterricht',
+          notes: '',
         },
         {
           id: 'v3',
@@ -79,6 +95,7 @@ const initialData = {
           tags: ['Dip', 'Rückwärtsbewegung'],
           style_tags: ['Flow', 'Sensual'],
           category: 'Tanzunterricht',
+          notes: '',
         },
       ],
     },
@@ -89,6 +106,7 @@ const initialData = {
       demoVideoId: 'KQ3gIL2B3wo',
       demoNotes:
         'Schnelle Fußarbeit kombiniert mit klassischen Drehfiguren. Gewichtsverlagerung ist entscheidend. Timing: eng am Beat bleiben, kein Verzögern bei den Synkopen.',
+      demoHashtags: ['#Footwork', '#Timing', '#Dominican'],
       practiceVideos: [
         {
           id: 'v4',
@@ -102,6 +120,7 @@ const initialData = {
           tags: ['Synkopen', 'Timing'],
           style_tags: ['Footwork', 'Fundamentals'],
           category: 'Workshop',
+          notes: '',
         },
         {
           id: 'v5',
@@ -115,6 +134,7 @@ const initialData = {
           tags: ['Cross-Body'],
           style_tags: ['Fundamentals'],
           category: 'Workshop',
+          notes: '',
         },
       ],
     },
@@ -125,6 +145,7 @@ const initialData = {
       demoVideoId: 'YlUKcNnnaf8',
       demoNotes:
         'Langsame, ausdrucksstarke Figuren für romantische Musikpassagen. Augen-Kontakt halten, Bewegungen nicht übertreiben. Qualität vor Quantität.',
+      demoHashtags: ['#Promenade', '#Bodywave', '#SensualBasic'],
       practiceVideos: [
         {
           id: 'v6',
@@ -138,6 +159,7 @@ const initialData = {
           tags: ['Embrace'],
           style_tags: ['Sensual', 'Flow'],
           category: 'Tanzunterricht',
+          notes: '',
         },
       ],
     },
@@ -233,6 +255,7 @@ export function addProject({ title, category, demoVideoId, demoNotes = '' }) {
     category,
     demoVideoId,
     demoNotes,
+    demoHashtags: [],
     practiceVideos: [],
   };
   return updateData((data) => ({
@@ -244,7 +267,11 @@ export function addProject({ title, category, demoVideoId, demoNotes = '' }) {
 export function getAllVideos(data) {
   return data.projects
     .flatMap((p) =>
-      p.practiceVideos.map((v) => ({ ...v, projectTitle: p.title }))
+      p.practiceVideos.map((v) => ({
+        ...v,
+        projectTitle: p.title,
+        hashtags: p.demoHashtags || [],
+      }))
     )
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 }
@@ -318,4 +345,68 @@ export function formatDate(dateString) {
     month: 'short',
     year: 'numeric',
   });
+}
+
+export function updateProjectHashtags(projectId, hashtags) {
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) =>
+      p.id === projectId ? { ...p, demoHashtags: hashtags } : p
+    ),
+  }));
+}
+
+export function updateProjectDemoNotes(projectId, notes) {
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) =>
+      p.id === projectId ? { ...p, demoNotes: notes } : p
+    ),
+  }));
+}
+
+export function updatePracticeVideoNotes(videoId, notes) {
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) => ({
+      ...p,
+      practiceVideos: p.practiceVideos.map((v) =>
+        v.id === videoId ? { ...v, notes } : v
+      ),
+    })),
+  }));
+}
+
+export function addTrainingExercise({ title, description = '', linkedVideoId = null, tags = [], category = '', scheduledDates = [] }) {
+  const newExercise = {
+    id: `te${Date.now()}`,
+    title,
+    description,
+    linkedVideoId,
+    tags,
+    category,
+    status: TRAINING_STATUS.NICHT_BEGONNEN,
+    scheduledDates,
+    createdAt: new Date().toISOString().split('T')[0],
+  };
+  return updateData((data) => ({
+    ...data,
+    trainingExercises: [...(data.trainingExercises || []), newExercise],
+  }));
+}
+
+export function updateTrainingExercise(id, updates) {
+  return updateData((data) => ({
+    ...data,
+    trainingExercises: (data.trainingExercises || []).map((e) =>
+      e.id === id ? { ...e, ...updates } : e
+    ),
+  }));
+}
+
+export function deleteTrainingExercise(id) {
+  return updateData((data) => ({
+    ...data,
+    trainingExercises: (data.trainingExercises || []).filter((e) => e.id !== id),
+  }));
 }

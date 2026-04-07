@@ -21,10 +21,14 @@ export default function Sammlung({ data }) {
     if (filterStyleTag && !(v.style_tags || []).includes(filterStyleTag)) return false;
     if (search.trim()) {
       const q = search.trim().toLowerCase();
+      const searchTag = q.startsWith('#') ? q : null;
       const inTitle = v.title.toLowerCase().includes(q);
       const inTags = (v.tags || []).some((t) => t.toLowerCase().includes(q));
       const inProject = (v.projectTitle || '').toLowerCase().includes(q);
-      if (!inTitle && !inTags && !inProject) return false;
+      const inHashtag = searchTag
+        ? (v.hashtags || []).some((h) => h.toLowerCase().includes(q))
+        : (v.hashtags || []).some((h) => h.toLowerCase().includes(q));
+      if (!inTitle && !inTags && !inProject && !inHashtag) return false;
     }
     return true;
   });

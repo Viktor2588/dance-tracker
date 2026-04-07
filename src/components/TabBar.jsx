@@ -3,6 +3,7 @@ export default function TabBar({ activeTab, onTabChange, onCameraClick }) {
   const tabs = [
     { id: 'start', label: 'Start', icon: <HomeIcon /> },
     { id: 'sammlung', label: 'Sammlung', icon: <CollectionIcon /> },
+    { id: 'training', label: 'Training', icon: <TrainingIcon /> },
     { id: 'statistik', label: 'Statistik', icon: <ChartIcon /> },
     { id: 'profil', label: 'Profil', icon: <ProfileIcon /> },
   ];
@@ -25,40 +26,36 @@ export default function TabBar({ activeTab, onTabChange, onCameraClick }) {
         zIndex: 100,
       }}
     >
-      {/* Left two tabs */}
-      {tabs.slice(0, 2).map((tab) => <TabButton key={tab.id} tab={tab} active={tab.id === activeTab} onTabChange={onTabChange} />)}
+      {tabs.map((tab) => <TabButton key={tab.id} tab={tab} active={tab.id === activeTab} onTabChange={onTabChange} />)}
 
-      {/* Floating camera button (center) */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-        <button
-          onClick={onCameraClick}
-          aria-label="Video hinzufügen"
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
-            border: 'none',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(22,163,74,0.40)',
-            position: 'absolute',
-            bottom: 8,
-            transition: 'transform 0.15s, box-shadow 0.15s',
-          }}
-          onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
-          onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-          onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
-          onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-        >
-          <CameraIcon />
-        </button>
-      </div>
-
-      {/* Right two tabs */}
-      {tabs.slice(2).map((tab) => <TabButton key={tab.id} tab={tab} active={tab.id === activeTab} onTabChange={onTabChange} />)}
+      {/* Floating camera button */}
+      <button
+        onClick={onCameraClick}
+        aria-label="Video hinzufügen"
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 16px rgba(37,99,235,0.40)',
+          position: 'fixed',
+          bottom: 'calc(var(--tab-height) + var(--safe-bottom) + 12px)',
+          right: 16,
+          transition: 'transform 0.15s, box-shadow 0.15s',
+          zIndex: 101,
+        }}
+        onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+        onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+      >
+        <CameraIcon />
+      </button>
     </nav>
   );
 }
@@ -105,6 +102,15 @@ function TabButton({ tab, active, onTabChange }) {
         {tab.label}
       </span>
     </button>
+  );
+}
+
+function TrainingIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <line x1="4" y1="22" x2="4" y2="15" />
+    </svg>
   );
 }
 
