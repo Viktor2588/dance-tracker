@@ -20,7 +20,7 @@ export default function VideoCard({ video, onClick, compact = false }) {
         onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
       >
         {/* Thumbnail */}
-        <div style={{ position: 'relative', width: '100%', paddingTop: '60%', background: '#EDE0D4', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', width: '100%', paddingTop: '60%', background: '#EFF6FF', overflow: 'hidden' }}>
           <img
             src={thumbnail}
             alt={video.title}
@@ -63,7 +63,7 @@ export default function VideoCard({ video, onClick, compact = false }) {
       onTouchEnd={(e) => (e.currentTarget.style.transform = 'scale(1)')}
     >
       {/* Thumbnail */}
-      <div style={{ position: 'relative', width: 110, flexShrink: 0, background: '#EDE0D4', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: 110, flexShrink: 0, background: '#EFF6FF', overflow: 'hidden' }}>
         <img
           src={thumbnail}
           alt={video.title}

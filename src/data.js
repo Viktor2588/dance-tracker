@@ -27,7 +27,7 @@ export const TRAINING_STATUS_LABELS = {
 };
 
 export const CATEGORIES = [
-  'Tanzunterricht',
+  'Tanzschule',
   'Workshop',
   'Festival',
   'Übung Solo',
@@ -65,9 +65,11 @@ const initialData = {
           trainedDates: ['2025-03-28', '2025-04-01', '2025-04-05'],
           last_practiced_at: '2025-04-05',
           tags: ['Körperwelle', 'Grundschritt'],
+          hashtags: [],
           style_tags: ['Flow', 'Sensual'],
-          category: 'Tanzunterricht',
+          category: 'Tanzschule',
           notes: '',
+          markers: [],
         },
         {
           id: 'v2',
@@ -79,9 +81,11 @@ const initialData = {
           trainedDates: ['2025-04-01', '2025-04-03'],
           last_practiced_at: '2025-04-03',
           tags: ['Drehung'],
+          hashtags: [],
           style_tags: ['Sensual'],
-          category: 'Tanzunterricht',
+          category: 'Tanzschule',
           notes: '',
+          markers: [],
         },
         {
           id: 'v3',
@@ -93,9 +97,11 @@ const initialData = {
           trainedDates: [],
           last_practiced_at: null,
           tags: ['Dip', 'Rückwärtsbewegung'],
+          hashtags: [],
           style_tags: ['Flow', 'Sensual'],
-          category: 'Tanzunterricht',
+          category: 'Tanzschule',
           notes: '',
+          markers: [],
         },
       ],
     },
@@ -118,9 +124,11 @@ const initialData = {
           trainedDates: ['2025-03-20', '2025-03-25'],
           last_practiced_at: '2025-03-25',
           tags: ['Synkopen', 'Timing'],
+          hashtags: [],
           style_tags: ['Footwork', 'Fundamentals'],
           category: 'Workshop',
           notes: '',
+          markers: [],
         },
         {
           id: 'v5',
@@ -132,9 +140,11 @@ const initialData = {
           trainedDates: [],
           last_practiced_at: null,
           tags: ['Cross-Body'],
+          hashtags: [],
           style_tags: ['Fundamentals'],
           category: 'Workshop',
           notes: '',
+          markers: [],
         },
       ],
     },
@@ -157,9 +167,11 @@ const initialData = {
           trainedDates: [],
           last_practiced_at: null,
           tags: ['Embrace'],
+          hashtags: [],
           style_tags: ['Sensual', 'Flow'],
-          category: 'Tanzunterricht',
+          category: 'Tanzschule',
           notes: '',
+          markers: [],
         },
       ],
     },
@@ -222,7 +234,7 @@ export function updateVideoStatus(videoId, status) {
   }));
 }
 
-export function addPracticeVideo(projectId, { title, videoId, notes = '' }) {
+export function addPracticeVideo(projectId, { title, videoId, notes = '', hashtags = [], category = '' }) {
   const today = new Date().toISOString().split('T')[0];
   const newVideo = {
     id: `v${Date.now()}`,
@@ -234,9 +246,11 @@ export function addPracticeVideo(projectId, { title, videoId, notes = '' }) {
     trainedDates: [],
     last_practiced_at: null,
     tags: [],
+    hashtags,
     style_tags: [],
-    category: '',
+    category,
     notes,
+    markers: [],
   };
   return updateData((data) => ({
     ...data,
@@ -410,3 +424,44 @@ export function deleteTrainingExercise(id) {
     trainingExercises: (data.trainingExercises || []).filter((e) => e.id !== id),
   }));
 }
+
+export function addVideoMarker(videoId, { time, note = '' }) {
+  const marker = { id: `m${Date.now()}`, time, note };
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) => ({
+      ...p,
+      practiceVideos: p.practiceVideos.map((v) =>
+        v.id === videoId
+          ? { ...v, markers: [...(v.markers || []), marker].sort((a, b) => a.time - b.time) }
+          : v
+      ),
+    })),
+  }));
+}
+
+export function removeVideoMarker(videoId, markerId) {
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) => ({
+      ...p,
+      practiceVideos: p.practiceVideos.map((v) =>
+        v.id === videoId
+          ? { ...v, markers: (v.markers || []).filter((m) => m.id !== markerId) }
+          : v
+      ),
+    })),
+  }));
+}
+
+export function getAllHashtags(data) {
+  const tags = new Set();
+  data.projects.forEach((p) => {
+    (p.demoHashtags || []).forEach((t) => tags.add(t));
+    p.practiceVideos.forEach((v) => {
+      (v.hashtags || []).forEach((t) => tags.add(t));
+    });
+  });
+  return [...tags].sort();
+}
+

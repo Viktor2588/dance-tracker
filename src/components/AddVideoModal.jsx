@@ -1,26 +1,31 @@
 import { useState } from 'react';
 import { addPracticeVideo, addProject, CATEGORIES } from '../data';
 
-export default function AddVideoModal({ data, onClose, onDataChange }) {
-  const [mode, setMode] = useState('practice'); // 'practice' | 'project'
-  const [projectId, setProjectId] = useState(data.projects[0]?.id || '');
-  const [title, setTitle] = useState('');
-  const [videoId, setVideoId] = useState('');
-  const [notes, setNotes] = useState('');
+const SUGGESTED_HASHTAGS = [
+  '#bodywave', '#hiproll', '#sensualbasic', '#promenade',
+  '#footwork', '#timing', '#drehung', '#grundschritt',
+  '#improvisation', '#bachata', '#salsa', '#flow',
+];
 
-  // For new project
-  const [projTitle, setProjTitle] = useState('');
-  const [projCategory, setProjCategory] = useState(CATEGORIES[0]);
-  const [projDemoVideoId, setProjDemoVideoId] = useState('');
-  const [projDemoNotes, setProjDemoNotes] = useState('');
+export default function AddVideoModal({ data, onClose, onDataChange }) {
+  // step: 'record' | 'metadata'
+  const [step, setStep] = useState('record');
+  const [mode, setMode] = useState('referenz'); // 'referenz' | 'uebung'
+
+  // Metadata fields
+  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [title, setTitle] = useState('');
+  const [hashtagInput, setHashtagInput] = useState('');
+  const [hashtags, setHashtags] = useState([]);
+  const [notes, setNotes] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [projectId, setProjectId] = useState(data.projects[0]?.id || '');
 
   const [error, setError] = useState('');
 
   function extractYoutubeId(input) {
     if (!input) return '';
-    // Already an ID (no slashes or dots)
     if (/^[a-zA-Z0-9_-]{11}$/.test(input.trim())) return input.trim();
-    // URL
     try {
       const url = new URL(input);
       return url.searchParams.get('v') || url.pathname.split('/').pop() || '';
@@ -29,21 +34,38 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
     }
   }
 
+  function handleAddHashtag(raw) {
+    let tag = (raw || hashtagInput).trim();
+    if (!tag) return;
+    if (!tag.startsWith('#')) tag = `#${tag}`;
+    if (!hashtags.includes(tag)) setHashtags((prev) => [...prev, tag]);
+    setHashtagInput('');
+  }
+
+  function handleRemoveHashtag(tag) {
+    setHashtags((prev) => prev.filter((t) => t !== tag));
+  }
+
+  function handleHashtagKeyDown(e) {
+    if (e.key === 'Enter') { e.preventDefault(); handleAddHashtag(); }
+  }
+
   function handleSubmit() {
     setError('');
-    if (mode === 'practice') {
-      if (!title.trim()) { setError('Titel eingeben'); return; }
-      if (!videoId.trim()) { setError('YouTube-URL oder Video-ID eingeben'); return; }
-      if (!projectId) { setError('Projekt auswählen'); return; }
-      const id = extractYoutubeId(videoId);
-      const next = addPracticeVideo(projectId, { title: title.trim(), videoId: id, notes });
+    if (mode === 'uebung') {
+      if (!projectId) { setError('Bitte ein Referenzvideo auswählen'); return; }
+      const id = extractYoutubeId(youtubeUrl);
+      if (!id) { setError('YouTube-URL oder Video-ID eingeben'); return; }
+      const videoTitle = title.trim() || `Übung ${new Date().toLocaleDateString('de-DE')}`;
+      const next = addPracticeVideo(projectId, { title: videoTitle, videoId: id, notes, hashtags, category });
       onDataChange(next);
       onClose();
     } else {
-      if (!projTitle.trim()) { setError('Projekttitel eingeben'); return; }
-      if (!projDemoVideoId.trim()) { setError('Demo-Video-URL eingeben'); return; }
-      const id = extractYoutubeId(projDemoVideoId);
-      const next = addProject({ title: projTitle.trim(), category: projCategory, demoVideoId: id, demoNotes: projDemoNotes });
+      // referenz / new project
+      const id = extractYoutubeId(youtubeUrl);
+      if (!id) { setError('YouTube-URL eingeben'); return; }
+      const projTitle = title.trim() || `Referenz ${new Date().toLocaleDateString('de-DE')}`;
+      const next = addProject({ title: projTitle, category, demoVideoId: id, demoNotes: notes });
       onDataChange(next);
       onClose();
     }
@@ -58,86 +80,263 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       {/* Backdrop */}
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }} onClick={onClose} />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} onClick={onClose} />
 
-      {/* Sheet */}
-      <div
-        style={{
-          position: 'relative',
-          background: 'var(--color-surface)',
-          borderRadius: '24px 24px 0 0',
-          padding: '24px 20px',
-          paddingBottom: 'calc(24px + var(--safe-bottom))',
-          maxHeight: '90dvh',
-          overflowY: 'auto',
-          zIndex: 201,
-        }}
-      >
-        {/* Handle */}
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--color-surface-raised)', margin: '0 auto 20px' }} />
+      {step === 'record' ? (
+        /* ── STEP 1: Recording Placeholder ── */
+        <div
+          style={{
+            position: 'relative',
+            background: '#0F172A',
+            borderRadius: '24px 24px 0 0',
+            paddingBottom: 'calc(32px + var(--safe-bottom))',
+            maxHeight: '90dvh',
+            zIndex: 201,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          {/* Handle */}
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)', margin: '16px auto 0' }} />
 
-        {/* Title */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text)' }}>Hinzufügen</h2>
-          <button onClick={onClose} style={{ color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+          {/* Close */}
+          <button
+            onClick={onClose}
+            style={{ position: 'absolute', top: 16, right: 16, color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', cursor: 'pointer', padding: 8 }}
+            aria-label="Schließen"
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-        </div>
 
-        {/* Mode Toggle */}
-        <div style={{ display: 'flex', background: 'var(--color-surface-raised)', borderRadius: 12, padding: 4, marginBottom: 24, gap: 4 }}>
-          {[['practice', 'Übungsvideo'], ['project', 'Neues Projekt']].map(([m, label]) => (
+          {/* Camera Viewfinder */}
+          <div style={{
+            width: 'calc(100% - 40px)', paddingTop: '60%', position: 'relative',
+            background: '#1E293B', borderRadius: 16, margin: '24px 20px 0',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 12,
+            }}>
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%',
+                border: '3px solid rgba(255,255,255,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 7l-7 5 7 5V7z" />
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                </svg>
+              </div>
+              <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+                Video Aufnahme läuft…
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444', animation: 'pulse 1.5s infinite' }} />
+                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>REC</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Mode Toggle */}
+          <div style={{ display: 'flex', background: 'rgba(255,255,255,0.08)', borderRadius: 12, padding: 4, margin: '20px 20px 0', gap: 4, width: 'calc(100% - 40px)' }}>
+            {[['referenz', '🎬 Referenzvideo'], ['uebung', '💪 Übungsvideo']].map(([m, label]) => (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                style={{
+                  flex: 1, padding: '8px 0', borderRadius: 10, fontSize: '0.82rem', fontWeight: 600,
+                  background: mode === m ? 'var(--color-primary)' : 'transparent',
+                  color: mode === m ? '#fff' : 'rgba(255,255,255,0.5)',
+                  border: 'none', cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >{label}</button>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: 12, margin: '20px 20px 0', width: 'calc(100% - 40px)' }}>
             <button
-              key={m}
-              onClick={() => setMode(m)}
+              onClick={() => setStep('metadata')}
               style={{
-                flex: 1, padding: '8px 0', borderRadius: 10, fontSize: '0.85rem', fontWeight: 600,
-                background: mode === m ? 'var(--color-surface)' : 'transparent',
-                color: mode === m ? 'var(--color-primary)' : 'var(--color-text-muted)',
+                flex: 1, padding: '14px 0', borderRadius: 'var(--border-radius-sm)',
+                fontSize: '0.95rem', fontWeight: 700,
+                background: 'var(--color-primary)', color: '#fff',
                 border: 'none', cursor: 'pointer',
-                boxShadow: mode === m ? '0 1px 6px rgba(0,0,0,0.08)' : 'none',
-                transition: 'all 0.2s',
+                boxShadow: '0 4px 14px rgba(37,99,235,0.4)',
               }}
-            >{label}</button>
-          ))}
+            >
+              Aufnahme stoppen →
+            </button>
+          </div>
         </div>
+      ) : (
+        /* ── STEP 2: Metadata Screen ── */
+        <div
+          style={{
+            position: 'relative',
+            background: 'var(--color-surface)',
+            borderRadius: '24px 24px 0 0',
+            padding: '24px 20px',
+            paddingBottom: 'calc(24px + var(--safe-bottom))',
+            maxHeight: '92dvh',
+            overflowY: 'auto',
+            zIndex: 201,
+          }}
+        >
+          {/* Handle */}
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--color-surface-raised)', margin: '0 auto 20px' }} />
 
-        {mode === 'practice' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Field label="Projekt">
-              <select
-                value={projectId}
-                onChange={(e) => setProjectId(e.target.value)}
-                style={selectStyle}
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button
+                onClick={() => setStep('record')}
+                style={{ color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex' }}
+                aria-label="Zurück"
               >
-                {data.projects.map((p) => (
-                  <option key={p.id} value={p.id}>{p.title}</option>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <path d="M19 12H5M12 5l-7 7 7 7" />
+                </svg>
+              </button>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text)' }}>Video bearbeiten</h2>
+            </div>
+            <button onClick={onClose} style={{ color: 'var(--color-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Type indicator */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'var(--color-primary-light)', borderRadius: 12,
+            padding: '10px 14px', marginBottom: 20,
+          }}>
+            <span style={{ fontSize: '1rem' }}>{mode === 'referenz' ? '🎬' : '💪'}</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-primary-dark)' }}>
+              {mode === 'referenz' ? 'Neues Referenzvideo (Lehrervideo)' : 'Neues Übungsvideo'}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Projekt auswählen (nur für Übungsvideo) */}
+            {mode === 'uebung' && (
+              <Field label="Referenzvideo (Projekt)">
+                <select
+                  value={projectId}
+                  onChange={(e) => setProjectId(e.target.value)}
+                  style={selectStyle}
+                >
+                  {data.projects.map((p) => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            {/* Kategorie */}
+            <Field label="Kategorie">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {CATEGORIES.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setCategory(c)}
+                    style={{
+                      padding: '6px 12px', borderRadius: 20, fontSize: '0.78rem', fontWeight: 600,
+                      border: 'none', cursor: 'pointer',
+                      background: category === c ? 'var(--color-primary)' : 'var(--color-surface-raised)',
+                      color: category === c ? '#fff' : 'var(--color-text-muted)',
+                      transition: 'all 0.15s',
+                    }}
+                  >{c}</button>
                 ))}
-              </select>
+              </div>
             </Field>
-            <Field label="Titel">
+
+            {/* Titel */}
+            <Field label="Titel (optional)">
               <input
-                placeholder="z. B. Training vom 05.04."
+                placeholder={mode === 'referenz' ? 'z. B. Bachata Sensual Flow' : 'z. B. Training vom 05.04.'}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 style={inputStyle}
               />
             </Field>
-            <Field label="YouTube-URL oder Video-ID">
+
+            {/* YouTube URL */}
+            <Field label={mode === 'referenz' ? 'YouTube-URL (Referenzvideo)' : 'YouTube-URL oder Video-ID'}>
               <input
-                placeholder="https://youtube.com/watch?v=... oder xHl2-5_-OGE"
-                value={videoId}
-                onChange={(e) => setVideoId(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
                 style={inputStyle}
                 autoCapitalize="off"
                 autoCorrect="off"
               />
             </Field>
+
+            {/* Hashtags */}
+            <Field label="Hashtags">
+              {hashtags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                  {hashtags.map((tag) => (
+                    <div
+                      key={tag}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'var(--color-primary-light)', borderRadius: 20, padding: '4px 10px' }}
+                    >
+                      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--color-primary-dark)' }}>{tag}</span>
+                      <button
+                        onClick={() => handleRemoveHashtag(tag)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary-dark)', padding: '0 0 0 2px', lineHeight: 1, display: 'flex' }}
+                        aria-label={`${tag} entfernen`}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <input
+                  type="text"
+                  placeholder="#bodywave, #hiproll …"
+                  value={hashtagInput}
+                  onChange={(e) => setHashtagInput(e.target.value)}
+                  onKeyDown={handleHashtagKeyDown}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button
+                  onClick={() => handleAddHashtag()}
+                  style={{ padding: '10px 16px', borderRadius: 10, fontSize: '1rem', fontWeight: 700, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                >+</button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                {SUGGESTED_HASHTAGS.filter((s) => !hashtags.includes(s)).slice(0, 6).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => handleAddHashtag(s)}
+                    style={{
+                      padding: '4px 10px', borderRadius: 20, fontSize: '0.72rem', fontWeight: 500,
+                      border: '1.5px dashed var(--color-primary-light)',
+                      background: 'transparent', color: 'var(--color-primary)',
+                      cursor: 'pointer',
+                    }}
+                  >{s}</button>
+                ))}
+              </div>
+            </Field>
+
+            {/* Notizen */}
             <Field label="Notizen (optional)">
               <textarea
-                placeholder="Eigene Beobachtungen..."
+                placeholder="Eigene Beobachtungen, Hinweise des Lehrers …"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
@@ -145,67 +344,32 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
               />
             </Field>
           </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Field label="Projekttitel">
-              <input
-                placeholder="z. B. Bachata Sensual Flow"
-                value={projTitle}
-                onChange={(e) => setProjTitle(e.target.value)}
-                style={inputStyle}
-              />
-            </Field>
-            <Field label="Kategorie">
-              <select value={projCategory} onChange={(e) => setProjCategory(e.target.value)} style={selectStyle}>
-                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </Field>
-            <Field label="Demo-Video (YouTube-URL)">
-              <input
-                placeholder="https://youtube.com/watch?v=..."
-                value={projDemoVideoId}
-                onChange={(e) => setProjDemoVideoId(e.target.value)}
-                style={inputStyle}
-                autoCapitalize="off"
-                autoCorrect="off"
-              />
-            </Field>
-            <Field label="Notizen zum Demo (optional)">
-              <textarea
-                placeholder="Anmerkungen des Lehrers..."
-                value={projDemoNotes}
-                onChange={(e) => setProjDemoNotes(e.target.value)}
-                rows={3}
-                style={{ ...inputStyle, resize: 'none' }}
-              />
-            </Field>
-          </div>
-        )}
 
-        {error && (
-          <p style={{ color: '#DC2626', fontSize: '0.82rem', marginTop: 12, fontWeight: 500 }}>{error}</p>
-        )}
+          {error && (
+            <p style={{ color: '#DC2626', fontSize: '0.82rem', marginTop: 12, fontWeight: 500 }}>{error}</p>
+          )}
 
-        <button
-          onClick={handleSubmit}
-          style={{
-            marginTop: 24,
-            width: '100%',
-            padding: '14px 0',
-            borderRadius: 'var(--border-radius-sm)',
-            fontSize: '0.95rem',
-            fontWeight: 700,
-            border: 'none',
-            cursor: 'pointer',
-            background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
-            color: '#fff',
-            letterSpacing: '0.02em',
-            boxShadow: '0 4px 14px rgba(22,163,74,0.30)',
-          }}
-        >
-          {mode === 'practice' ? 'Video hinzufügen' : 'Projekt erstellen'}
-        </button>
-      </div>
+          <button
+            onClick={handleSubmit}
+            style={{
+              marginTop: 24,
+              width: '100%',
+              padding: '14px 0',
+              borderRadius: 'var(--border-radius-sm)',
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              background: 'var(--color-primary)',
+              color: '#fff',
+              letterSpacing: '0.02em',
+              boxShadow: '0 4px 14px rgba(37,99,235,0.30)',
+            }}
+          >
+            {mode === 'referenz' ? 'Referenzvideo erstellen' : 'Übungsvideo hinzufügen'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -213,7 +377,7 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
 function Field({ label, children }) {
   return (
     <div>
-      <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>
+      <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>
         {label}
       </p>
       {children}
@@ -243,3 +407,4 @@ const selectStyle = {
   paddingRight: 36,
   cursor: 'pointer',
 };
+

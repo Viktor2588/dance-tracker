@@ -10,3 +10,15 @@ export function sendSpeedToYoutube(iframe, speed) {
     // ignore cross-origin or missing iframe errors
   }
 }
+
+// Seeks to a specific time (in seconds) in a YouTube iframe.
+export function seekToYoutube(iframe, seconds) {
+  try {
+    iframe?.contentWindow?.postMessage(
+      JSON.stringify({ event: 'command', func: 'seekTo', args: [seconds, true] }),
+      '*'
+    );
+  } catch {
+    // ignore cross-origin or missing iframe errors
+  }
+}

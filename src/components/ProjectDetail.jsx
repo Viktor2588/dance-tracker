@@ -125,7 +125,7 @@ export default function ProjectDetail({ project, onBack, onDataChange }) {
           ) : (
             <div
               onClick={() => setActiveVideoId('demo')}
-              style={{ position: 'relative', paddingTop: '56.25%', cursor: 'pointer', background: '#EDE0D4', overflow: 'hidden' }}
+              style={{ position: 'relative', paddingTop: '56.25%', cursor: 'pointer', background: '#EFF6FF', overflow: 'hidden' }}
             >
               <img
                 src={getYoutubeThumbnail(project.demoVideoId)}
@@ -266,7 +266,7 @@ function PracticeVideoCard({ video, isPlaying, onPlay, isTodayTrained, onTrained
   return (
     <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--border-radius-md)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
       {/* Video Thumbnail / Player */}
-      <div style={{ position: 'relative', background: '#EDE0D4', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', background: '#EFF6FF', overflow: 'hidden' }}>
         {isPlaying ? (
           <div style={{ position: 'relative', paddingTop: '56.25%' }}>
             <iframe
@@ -297,6 +297,9 @@ function PracticeVideoCard({ video, isPlaying, onPlay, isTodayTrained, onTrained
                   <polygon points="5,3 19,12 5,21" />
                 </svg>
               </div>
+            </div>
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(255,255,255,0.92)', borderRadius: 20, padding: '3px 10px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-text)' }}>
+              {formatDate(video.date)}
             </div>
           </div>
         )}

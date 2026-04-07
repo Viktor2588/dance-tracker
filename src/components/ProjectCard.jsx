@@ -50,7 +50,7 @@ export default function ProjectCard({ project, onClick }) {
       </div>
 
       {/* Thumbnail */}
-      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#E8F5E9', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#EFF6FF', overflow: 'hidden' }}>
         <img
           src={thumbnail}
           alt={project.title}
