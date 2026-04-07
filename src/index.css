@@ -11,22 +11,26 @@
   --color-surface: #FFFFFF;
   --color-surface-raised: #F1F5F9;
 
-  /* Primary: Green */
-  --color-primary: #16A34A;
-  --color-primary-light: #DCFCE7;
-  --color-primary-dark: #15803D;
+  /* Primary: Blue */
+  --color-primary: #2563EB;
+  --color-primary-light: #DBEAFE;
+  --color-primary-dark: #1D4ED8;
 
-  /* Secondary: Blue */
-  --color-secondary: #2563EB;
-  --color-secondary-light: #DBEAFE;
-  --color-secondary-dark: #1D4ED8;
+  /* Secondary: Indigo/Violet accent */
+  --color-secondary: #7C3AED;
+  --color-secondary-light: #EDE9FE;
+  --color-secondary-dark: #6D28D9;
 
   /* Aliases kept for backward-compat with existing components */
-  --color-accent: #DCFCE7;          /* primary-light */
-  --color-accent-dark: #16A34A;     /* primary */
-  --color-rose: #DBEAFE;            /* secondary-light */
-  --color-gold: #16A34A;            /* primary */
-  --color-gold-bg: #DCFCE7;         /* primary-light */
+  --color-accent: #DBEAFE;          /* primary-light */
+  --color-accent-dark: #2563EB;     /* primary */
+  --color-rose: #EDE9FE;            /* secondary-light */
+  --color-gold: #2563EB;            /* primary */
+  --color-gold-bg: #DBEAFE;         /* primary-light */
+
+  /* Status badges */
+  --badge-safe-bg: #DCFCE7;
+  --badge-safe-text: #15803D;
 
   --color-text: #1E293B;
   --color-text-muted: #64748B;
