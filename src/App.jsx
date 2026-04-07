@@ -8,6 +8,7 @@ import Sammlung from './components/Sammlung';
 import Statistik from './components/Statistik';
 import Profil from './components/Profil';
 import Training from './components/Training';
+import Vergleich from './components/Vergleich';
 import AddVideoModal from './components/AddVideoModal';
 
 export default function App() {
@@ -53,6 +54,7 @@ export default function App() {
         )}
         {tab === 'sammlung' && <Sammlung data={data} />}
         {tab === 'training' && <Training data={data} onDataChange={handleDataChange} />}
+        {tab === 'vergleich' && <Vergleich data={data} onDataChange={handleDataChange} />}
         {tab === 'statistik' && <Statistik data={data} />}
         {tab === 'profil' && <Profil data={data} />}
       </main>

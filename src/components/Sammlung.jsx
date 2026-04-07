@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getAllVideos, STATUS, CATEGORIES, STYLE_TAGS } from '../data';
+import { getAllVideos, STATUS, CATEGORIES, STYLE_TAGS, getAllHashtags } from '../data';
 import VideoCard from './VideoCard';
 
 const VIEW_TIMELINE = 'timeline';
@@ -10,24 +10,28 @@ export default function Sammlung({ data }) {
   const [filterStatus, setFilterStatus] = useState('alle');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStyleTag, setFilterStyleTag] = useState('');
+  const [filterHashtag, setFilterHashtag] = useState('');
   const [search, setSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   const allVideos = getAllVideos(data);
+  const allHashtags = getAllHashtags(data);
 
   const filtered = allVideos.filter((v) => {
     if (filterStatus !== 'alle' && v.status !== filterStatus) return false;
     if (filterCategory && v.category !== filterCategory) return false;
     if (filterStyleTag && !(v.style_tags || []).includes(filterStyleTag)) return false;
+    if (filterHashtag) {
+      const inVideoHashtags = (v.hashtags || []).includes(filterHashtag);
+      const inProjectHashtags = (v.hashtags || []).includes(filterHashtag);
+      if (!inVideoHashtags && !inProjectHashtags) return false;
+    }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
-      const searchTag = q.startsWith('#') ? q : null;
       const inTitle = v.title.toLowerCase().includes(q);
       const inTags = (v.tags || []).some((t) => t.toLowerCase().includes(q));
       const inProject = (v.projectTitle || '').toLowerCase().includes(q);
-      const inHashtag = searchTag
-        ? (v.hashtags || []).some((h) => h.toLowerCase().includes(q))
-        : (v.hashtags || []).some((h) => h.toLowerCase().includes(q));
+      const inHashtag = (v.hashtags || []).some((h) => h.toLowerCase().includes(q));
       if (!inTitle && !inTags && !inProject && !inHashtag) return false;
     }
     return true;
@@ -37,6 +41,7 @@ export default function Sammlung({ data }) {
     filterStatus !== 'alle',
     !!filterCategory,
     !!filterStyleTag,
+    !!filterHashtag,
   ].filter(Boolean).length;
 
   return (
@@ -149,16 +154,29 @@ export default function Sammlung({ data }) {
 
           {/* Style Tags */}
           <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Style</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
             <FilterChip label="Alle" active={!filterStyleTag} onClick={() => setFilterStyleTag('')} />
             {STYLE_TAGS.map((t) => (
               <FilterChip key={t} label={t} active={filterStyleTag === t} onClick={() => setFilterStyleTag(filterStyleTag === t ? '' : t)} />
             ))}
           </div>
 
+          {/* Hashtags */}
+          {allHashtags.length > 0 && (
+            <>
+              <p style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Hashtag</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+                <FilterChip label="Alle" active={!filterHashtag} onClick={() => setFilterHashtag('')} />
+                {allHashtags.map((h) => (
+                  <FilterChip key={h} label={h} active={filterHashtag === h} onClick={() => setFilterHashtag(filterHashtag === h ? '' : h)} />
+                ))}
+              </div>
+            </>
+          )}
+
           {activeFilterCount > 0 && (
             <button
-              onClick={() => { setFilterStatus('alle'); setFilterCategory(''); setFilterStyleTag(''); }}
+              onClick={() => { setFilterStatus('alle'); setFilterCategory(''); setFilterStyleTag(''); setFilterHashtag(''); }}
               style={{ marginTop: 14, width: '100%', padding: '8px 0', borderRadius: 8, fontSize: '0.82rem', fontWeight: 600, border: 'none', cursor: 'pointer', background: 'var(--color-surface-raised)', color: 'var(--color-text-muted)' }}
             >
               Filter zurücksetzen
