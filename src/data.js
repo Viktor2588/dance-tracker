@@ -27,7 +27,7 @@ export const TRAINING_STATUS_LABELS = {
 };
 
 export const CATEGORIES = [
-  'Tanzschule',
+  'Unterrichtseinheit',
   'Workshop',
   'Festival',
   'Übung Solo',
@@ -67,8 +67,10 @@ const initialData = {
           tags: ['Körperwelle', 'Grundschritt'],
           hashtags: [],
           style_tags: ['Flow', 'Sensual'],
-          category: 'Tanzschule',
+          category: 'Unterrichtseinheit',
           notes: '',
+          location: '',
+          inTrainingPlan: true,
           markers: [],
         },
         {
@@ -83,8 +85,10 @@ const initialData = {
           tags: ['Drehung'],
           hashtags: [],
           style_tags: ['Sensual'],
-          category: 'Tanzschule',
+          category: 'Unterrichtseinheit',
           notes: '',
+          location: '',
+          inTrainingPlan: true,
           markers: [],
         },
         {
@@ -99,8 +103,10 @@ const initialData = {
           tags: ['Dip', 'Rückwärtsbewegung'],
           hashtags: [],
           style_tags: ['Flow', 'Sensual'],
-          category: 'Tanzschule',
+          category: 'Unterrichtseinheit',
           notes: '',
+          location: '',
+          inTrainingPlan: false,
           markers: [],
         },
       ],
@@ -128,6 +134,8 @@ const initialData = {
           style_tags: ['Footwork', 'Fundamentals'],
           category: 'Workshop',
           notes: '',
+          location: '',
+          inTrainingPlan: true,
           markers: [],
         },
         {
@@ -144,6 +152,8 @@ const initialData = {
           style_tags: ['Fundamentals'],
           category: 'Workshop',
           notes: '',
+          location: '',
+          inTrainingPlan: false,
           markers: [],
         },
       ],
@@ -151,7 +161,7 @@ const initialData = {
     {
       id: 'p3',
       title: 'Romantik-Figuren',
-      category: 'Tanzunterricht',
+      category: 'Unterrichtseinheit',
       demoVideoId: 'YlUKcNnnaf8',
       demoNotes:
         'Langsame, ausdrucksstarke Figuren für romantische Musikpassagen. Augen-Kontakt halten, Bewegungen nicht übertreiben. Qualität vor Quantität.',
@@ -169,8 +179,10 @@ const initialData = {
           tags: ['Embrace'],
           hashtags: [],
           style_tags: ['Sensual', 'Flow'],
-          category: 'Tanzschule',
+          category: 'Unterrichtseinheit',
           notes: '',
+          location: '',
+          inTrainingPlan: false,
           markers: [],
         },
       ],
@@ -234,7 +246,7 @@ export function updateVideoStatus(videoId, status) {
   }));
 }
 
-export function addPracticeVideo(projectId, { title, videoId, notes = '', hashtags = [], category = '' }) {
+export function addPracticeVideo(projectId, { title, videoId, notes = '', hashtags = [], category = '', location = '', inTrainingPlan = false }) {
   const today = new Date().toISOString().split('T')[0];
   const newVideo = {
     id: `v${Date.now()}`,
@@ -250,6 +262,8 @@ export function addPracticeVideo(projectId, { title, videoId, notes = '', hashta
     style_tags: [],
     category,
     notes,
+    location,
+    inTrainingPlan,
     markers: [],
   };
   return updateData((data) => ({
@@ -262,7 +276,7 @@ export function addPracticeVideo(projectId, { title, videoId, notes = '', hashta
   }));
 }
 
-export function addProject({ title, category, demoVideoId, demoNotes = '' }) {
+export function addProject({ title, category, demoVideoId, demoNotes = '', location = '' }) {
   const newProject = {
     id: `p${Date.now()}`,
     title,
@@ -270,6 +284,7 @@ export function addProject({ title, category, demoVideoId, demoNotes = '' }) {
     demoVideoId,
     demoNotes,
     demoHashtags: [],
+    location,
     practiceVideos: [],
   };
   return updateData((data) => ({
@@ -465,3 +480,27 @@ export function getAllHashtags(data) {
   return [...tags].sort();
 }
 
+export function updateVideoTrainingPlan(videoId, inTrainingPlan) {
+  return updateData((data) => ({
+    ...data,
+    projects: data.projects.map((p) => ({
+      ...p,
+      practiceVideos: p.practiceVideos.map((v) =>
+        v.id === videoId ? { ...v, inTrainingPlan } : v
+      ),
+    })),
+  }));
+}
+
+export function getTrainingPlanVideos(data) {
+  return data.projects.flatMap((p) =>
+    p.practiceVideos
+      .filter((v) => v.inTrainingPlan)
+      .map((v) => ({
+        ...v,
+        projectTitle: p.title,
+        projectDemoVideoId: p.demoVideoId,
+        projectCategory: p.category,
+      }))
+  );
+}

@@ -1,10 +1,10 @@
 
 export default function TabBar({ activeTab, onTabChange, onCameraClick }) {
-  const tabs = [
-    { id: 'start', label: 'Start', icon: <HomeIcon /> },
-    { id: 'sammlung', label: 'Sammlung', icon: <CollectionIcon /> },
+  const leftTabs = [
+    { id: 'bibliothek', label: 'Bibliothek', icon: <LibraryIcon /> },
+  ];
+  const rightTabs = [
     { id: 'training', label: 'Training', icon: <TrainingIcon /> },
-    { id: 'vergleich', label: 'Vergleich', icon: <CompareIcon /> },
     { id: 'profil', label: 'Profil', icon: <ProfileIcon /> },
   ];
 
@@ -26,36 +26,46 @@ export default function TabBar({ activeTab, onTabChange, onCameraClick }) {
         zIndex: 100,
       }}
     >
-      {tabs.map((tab) => <TabButton key={tab.id} tab={tab} active={tab.id === activeTab} onTabChange={onTabChange} />)}
+      {leftTabs.map((tab) => (
+        <TabButton key={tab.id} tab={tab} active={tab.id === activeTab} onTabChange={onTabChange} />
+      ))}
 
-      {/* Floating camera button */}
-      <button
-        onClick={onCameraClick}
-        aria-label="Video hinzufügen"
-        style={{
-          width: 44,
-          height: 44,
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 4px 16px rgba(37,99,235,0.40)',
-          position: 'fixed',
-          bottom: 'calc(var(--tab-height) + var(--safe-bottom) + 12px)',
-          right: 16,
-          transition: 'transform 0.15s, box-shadow 0.15s',
-          zIndex: 101,
-        }}
-        onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
-        onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
-        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-      >
-        <CameraIcon />
-      </button>
+      {/* Center Kamera button */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <button
+          onClick={onCameraClick}
+          aria-label="Video aufnehmen"
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 18px rgba(37,99,235,0.45)',
+            position: 'absolute',
+            bottom: 8,
+            transition: 'transform 0.15s, box-shadow 0.15s',
+            zIndex: 101,
+          }}
+          onTouchStart={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+          onTouchEnd={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+          onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.92)'; }}
+          onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+        >
+          <CameraIcon />
+        </button>
+        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--color-primary)', position: 'absolute', bottom: 2, letterSpacing: '0.01em' }}>
+          Kamera
+        </span>
+      </div>
+
+      {rightTabs.map((tab) => (
+        <TabButton key={tab.id} tab={tab} active={tab.id === activeTab} onTabChange={onTabChange} />
+      ))}
     </nav>
   );
 }
@@ -114,28 +124,13 @@ function TrainingIcon() {
   );
 }
 
-function HomeIcon() {
+function LibraryIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  );
-}
-
-function CollectionIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M19 11H5M19 6H5M19 16H5M19 21H5" />
-    </svg>
-  );
-}
-
-function CompareIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="3" width="9" height="18" rx="2" />
-      <rect x="13" y="3" width="9" height="18" rx="2" />
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
     </svg>
   );
 }
@@ -151,7 +146,7 @@ function ProfileIcon() {
 
 function CameraIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M23 7l-7 5 7 5V7z" />
       <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
     </svg>

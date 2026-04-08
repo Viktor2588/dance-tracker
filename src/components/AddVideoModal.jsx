@@ -13,15 +13,17 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
   const [mode, setMode] = useState('referenz'); // 'referenz' | 'uebung'
 
   // Metadata fields
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState('');
   const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
   const [hashtagInput, setHashtagInput] = useState('');
   const [hashtags, setHashtags] = useState([]);
   const [notes, setNotes] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [projectId, setProjectId] = useState(data.projects[0]?.id || '');
+  const [inTrainingPlan, setInTrainingPlan] = useState(false);
 
-  const [error, setError] = useState('');
+  const today = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
 
   function extractYoutubeId(input) {
     if (!input) return '';
@@ -51,24 +53,29 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
   }
 
   function handleSubmit() {
-    setError('');
     if (mode === 'uebung') {
-      if (!projectId) { setError('Bitte ein Referenzvideo auswählen'); return; }
       const id = extractYoutubeId(youtubeUrl);
-      if (!id) { setError('YouTube-URL oder Video-ID eingeben'); return; }
       const videoTitle = title.trim() || `Übung ${new Date().toLocaleDateString('de-DE')}`;
-      const next = addPracticeVideo(projectId, { title: videoTitle, videoId: id, notes, hashtags, category });
-      onDataChange(next);
-      onClose();
+      if (id && projectId) {
+        const next = addPracticeVideo(projectId, { title: videoTitle, videoId: id, notes, hashtags, category, location, inTrainingPlan });
+        onDataChange(next);
+      } else if (projectId) {
+        // No video URL – still save metadata entry (empty videoId allowed)
+        const next = addPracticeVideo(projectId, { title: videoTitle, videoId: id || 'placeholder', notes, hashtags, category, location, inTrainingPlan });
+        onDataChange(next);
+      }
     } else {
-      // referenz / new project
       const id = extractYoutubeId(youtubeUrl);
-      if (!id) { setError('YouTube-URL eingeben'); return; }
       const projTitle = title.trim() || `Referenz ${new Date().toLocaleDateString('de-DE')}`;
-      const next = addProject({ title: projTitle, category, demoVideoId: id, demoNotes: notes });
-      onDataChange(next);
-      onClose();
+      if (id) {
+        const next = addProject({ title: projTitle, category, demoVideoId: id, demoNotes: notes, location });
+        onDataChange(next);
+      } else if (projTitle) {
+        const next = addProject({ title: projTitle, category, demoVideoId: 'placeholder', demoNotes: notes, location });
+        onDataChange(next);
+      }
     }
+    onClose();
   }
 
   return (
@@ -225,7 +232,7 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Projekt auswählen (nur für Übungsvideo) */}
-            {mode === 'uebung' && (
+            {mode === 'uebung' && data.projects.length > 0 && (
               <Field label="Referenzvideo (Projekt)">
                 <select
                   value={projectId}
@@ -240,12 +247,12 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
             )}
 
             {/* Kategorie */}
-            <Field label="Kategorie">
+            <Field label="Kategorie (optional)">
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {CATEGORIES.map((c) => (
                   <button
                     key={c}
-                    onClick={() => setCategory(c)}
+                    onClick={() => setCategory(category === c ? '' : c)}
                     style={{
                       padding: '6px 12px', borderRadius: 20, fontSize: '0.78rem', fontWeight: 600,
                       border: 'none', cursor: 'pointer',
@@ -268,8 +275,28 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
               />
             </Field>
 
+            {/* Datum */}
+            <Field label="Datum">
+              <div style={{ ...inputStyle, color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <span style={{ fontSize: '0.9rem' }}>{today}</span>
+              </div>
+            </Field>
+
+            {/* Ort */}
+            <Field label="Ort (optional)">
+              <input
+                placeholder="z. B. Tanzstudio, Festival Berlin…"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                style={inputStyle}
+              />
+            </Field>
+
             {/* YouTube URL */}
-            <Field label={mode === 'referenz' ? 'YouTube-URL (Referenzvideo)' : 'YouTube-URL oder Video-ID'}>
+            <Field label={mode === 'referenz' ? 'YouTube-URL (optional)' : 'YouTube-URL oder Video-ID (optional)'}>
               <input
                 placeholder="https://youtube.com/watch?v=..."
                 value={youtubeUrl}
@@ -333,6 +360,44 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
               </div>
             </Field>
 
+            {/* Zum Trainingsplan hinzufügen (only for Übungsvideo) */}
+            {mode === 'uebung' && (
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  background: inTrainingPlan ? 'var(--color-primary-light)' : 'var(--color-surface-raised)',
+                  borderRadius: 12, padding: '14px 16px',
+                  cursor: 'pointer', transition: 'background 0.2s',
+                }}
+                onClick={() => setInTrainingPlan(!inTrainingPlan)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: '1.2rem' }}>📋</span>
+                  <div>
+                    <p style={{ fontSize: '0.9rem', fontWeight: 600, color: inTrainingPlan ? 'var(--color-primary-dark)' : 'var(--color-text)' }}>
+                      Zum Trainingsplan hinzufügen
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: 1 }}>
+                      Erscheint unter &quot;Als nächstes üben&quot;
+                    </p>
+                  </div>
+                </div>
+                <div style={{
+                  width: 44, height: 26, borderRadius: 13,
+                  background: inTrainingPlan ? 'var(--color-primary)' : 'rgba(0,0,0,0.15)',
+                  position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+                }}>
+                  <div style={{
+                    width: 20, height: 20, borderRadius: '50%', background: '#fff',
+                    position: 'absolute', top: 3,
+                    left: inTrainingPlan ? 21 : 3,
+                    transition: 'left 0.2s',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                  }} />
+                </div>
+              </div>
+            )}
+
             {/* Notizen */}
             <Field label="Notizen (optional)">
               <textarea
@@ -344,10 +409,6 @@ export default function AddVideoModal({ data, onClose, onDataChange }) {
               />
             </Field>
           </div>
-
-          {error && (
-            <p style={{ color: '#DC2626', fontSize: '0.82rem', marginTop: 12, fontWeight: 500 }}>{error}</p>
-          )}
 
           <button
             onClick={handleSubmit}
