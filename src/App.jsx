@@ -2,17 +2,14 @@ import { useState, useCallback } from 'react';
 import './App.css';
 import { getData } from './data';
 import TabBar from './components/TabBar';
-import Projekte from './components/Projekte';
+import Bibliothek from './components/Bibliothek';
 import ProjectDetail from './components/ProjectDetail';
-import Sammlung from './components/Sammlung';
-import Statistik from './components/Statistik';
 import Profil from './components/Profil';
 import Training from './components/Training';
-import Vergleich from './components/Vergleich';
 import AddVideoModal from './components/AddVideoModal';
 
 export default function App() {
-  const [tab, setTab] = useState('start');
+  const [tab, setTab] = useState('bibliothek');
   const [activeProjectId, setActiveProjectId] = useState(null);
   const [data, setData] = useState(() => getData());
   const [showAddModal, setShowAddModal] = useState(false);
@@ -42,20 +39,19 @@ export default function App() {
     <div className="app">
       {/* Main scrollable content */}
       <main className="app-main">
-        {tab === 'start' && !activeProject && (
-          <Projekte data={data} onOpenProject={handleOpenProject} />
+        {tab === 'bibliothek' && !activeProject && (
+          <Bibliothek data={data} onOpenProject={handleOpenProject} />
         )}
-        {tab === 'start' && activeProject && (
+        {tab === 'bibliothek' && activeProject && (
           <ProjectDetail
             project={activeProject}
             onBack={handleBack}
             onDataChange={handleDataChange}
           />
         )}
-        {tab === 'sammlung' && <Sammlung data={data} />}
-        {tab === 'training' && <Training data={data} onDataChange={handleDataChange} />}
-        {tab === 'vergleich' && <Vergleich data={data} onDataChange={handleDataChange} />}
-        {tab === 'statistik' && <Statistik data={data} />}
+        {tab === 'training' && (
+          <Training data={data} onDataChange={handleDataChange} onOpenProject={handleOpenProject} activeProject={activeProject} onBack={handleBack} />
+        )}
         {tab === 'profil' && <Profil data={data} />}
       </main>
 
